@@ -10,11 +10,27 @@ import (
 	"movie_graphql_be/graph/model"
 )
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
+func (r *mutationResolver) Movie(ctx context.Context, input model.PrimaryID) (*model.MovieDetail, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
+func (r *mutationResolver) User(ctx context.Context, input model.PrimaryID) (*model.UserDetail, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) Register(ctx context.Context, input model.Register) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) NewReview(ctx context.Context, input model.NewReview) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Movies(ctx context.Context) ([]*model.Movie, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
