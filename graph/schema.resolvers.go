@@ -33,7 +33,16 @@ func (r *mutationResolver) Register(ctx context.Context, input model.Register) (
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	var login users.Login
+	login.Username = input.Username
+	login.Password = input.Password
+
+	token, err := login.LoginUser()
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 func (r *mutationResolver) NewReview(ctx context.Context, input model.NewReview) (string, error) {
