@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"movie_graphql_be/graph/generated"
 	"movie_graphql_be/graph/model"
+	"movie_graphql_be/internal/users"
 )
 
 func (r *mutationResolver) DetailMovie(ctx context.Context, input model.PrimaryID) (*model.MovieDetail, error) {
@@ -15,16 +16,20 @@ func (r *mutationResolver) DetailMovie(ctx context.Context, input model.PrimaryI
 }
 
 func (r *mutationResolver) Register(ctx context.Context, input model.Register) (string, error) {
-	register := model.Register{
-		Username:        input.Username,
-		Email:           input.Email,
-		FirstName:       input.FirstName,
-		LastName:        input.LastName,
-		Password:        input.Password,
-		ConfirmPassword: input.ConfirmPassword,
+	var user users.User
+
+	user.Username = input.Username
+	user.Email = input.Email
+	user.FirstName = input.FirstName
+	user.LastName = input.LastName
+	user.Password = input.Password
+	user.ConfirmPassword = input.ConfirmPassword
+	success, err := user.CreateUser()
+	if err != nil {
+		return "", err
 	}
 
-	return fmt.Sprintf("%s %s %s %s", register.Username, register.Email, register.FirstName, register.LastName), nil
+	return success, nil
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {

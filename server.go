@@ -12,24 +12,29 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/joho/godotenv"
 )
-
-const defaultPort = "7000"
+const defaultHost = "localhost"
+const defaultPort = "8080"
 
 func main() {
-	port := os.Getenv("PORT")
+	godotenv.Load()
+	host := os.Getenv("CONN_HOST")
+	port := os.Getenv("CONN_PORT")
+	if host == "" {
+		host = defaultHost
+	}
 	if port == "" {
 		port = defaultPort
 	}
 
-	godotenv.Load()
-	db.InitDB()
-	db.Migrate()
+
+	mysql.InitDB()
+	mysql.Migrate()
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Printf("connect to http://%s:%s/ for GraphQL playground", host, port)
+	log.Fatal(http.ListenAndServe(host+":"+port, nil))
 }
