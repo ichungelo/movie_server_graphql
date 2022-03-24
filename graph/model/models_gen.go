@@ -47,6 +47,7 @@ type Review struct {
 	ID        string `json:"id"`
 	MovieID   string `json:"movieId"`
 	UserID    string `json:"userId"`
+	Username  string `json:"username"`
 	Review    string `json:"review"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`

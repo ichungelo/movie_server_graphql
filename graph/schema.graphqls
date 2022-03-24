@@ -39,6 +39,7 @@ type Review {
   id: ID!
   movieId: ID!
   userId: ID!
+  username: String!
   review: String!
   createdAt: String!
   updatedAt: String!
@@ -78,8 +79,7 @@ type Query {
 }
 
 type Mutation {
-  movie(input: PrimaryID!): MovieDetail!
-  user(input: PrimaryID!): UserDetail!
+  detailMovie(input: PrimaryID!): MovieDetail!
   register(input: Register!): String!
   login(input: Login!): String!
   newReview(input: NewReview!): String!

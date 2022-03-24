@@ -61,11 +61,10 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		Login     func(childComplexity int, input model.Login) int
-		Movie     func(childComplexity int, input model.PrimaryID) int
-		NewReview func(childComplexity int, input model.NewReview) int
-		Register  func(childComplexity int, input model.Register) int
-		User      func(childComplexity int, input model.PrimaryID) int
+		DetailMovie func(childComplexity int, input model.PrimaryID) int
+		Login       func(childComplexity int, input model.Login) int
+		NewReview   func(childComplexity int, input model.NewReview) int
+		Register    func(childComplexity int, input model.Register) int
 	}
 
 	Query struct {
@@ -79,6 +78,7 @@ type ComplexityRoot struct {
 		Review    func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
 		UserID    func(childComplexity int) int
+		Username  func(childComplexity int) int
 	}
 
 	User struct {
@@ -104,8 +104,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	Movie(ctx context.Context, input model.PrimaryID) (*model.MovieDetail, error)
-	User(ctx context.Context, input model.PrimaryID) (*model.UserDetail, error)
+	DetailMovie(ctx context.Context, input model.PrimaryID) (*model.MovieDetail, error)
 	Register(ctx context.Context, input model.Register) (string, error)
 	Login(ctx context.Context, input model.Login) (string, error)
 	NewReview(ctx context.Context, input model.NewReview) (string, error)
@@ -206,6 +205,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MovieDetail.Year(childComplexity), true
 
+	case "Mutation.detailMovie":
+		if e.complexity.Mutation.DetailMovie == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_detailMovie_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DetailMovie(childComplexity, args["input"].(model.PrimaryID)), true
+
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
 			break
@@ -217,18 +228,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Login(childComplexity, args["input"].(model.Login)), true
-
-	case "Mutation.movie":
-		if e.complexity.Mutation.Movie == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_movie_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.Movie(childComplexity, args["input"].(model.PrimaryID)), true
 
 	case "Mutation.newReview":
 		if e.complexity.Mutation.NewReview == nil {
@@ -253,18 +252,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Register(childComplexity, args["input"].(model.Register)), true
-
-	case "Mutation.user":
-		if e.complexity.Mutation.User == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_user_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.User(childComplexity, args["input"].(model.PrimaryID)), true
 
 	case "Query.movies":
 		if e.complexity.Query.Movies == nil {
@@ -314,6 +301,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Review.UserID(childComplexity), true
+
+	case "Review.username":
+		if e.complexity.Review.Username == nil {
+			break
+		}
+
+		return e.complexity.Review.Username(childComplexity), true
 
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
@@ -525,6 +519,7 @@ type Review {
   id: ID!
   movieId: ID!
   userId: ID!
+  username: String!
   review: String!
   createdAt: String!
   updatedAt: String!
@@ -564,8 +559,7 @@ type Query {
 }
 
 type Mutation {
-  movie(input: PrimaryID!): MovieDetail!
-  user(input: PrimaryID!): UserDetail!
+  detailMovie(input: PrimaryID!): MovieDetail!
   register(input: Register!): String!
   login(input: Login!): String!
   newReview(input: NewReview!): String!
@@ -578,13 +572,13 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_detailMovie_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.Login
+	var arg0 model.PrimaryID
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNLogin2movie_graphql_beᚋgraphᚋmodelᚐLogin(ctx, tmp)
+		arg0, err = ec.unmarshalNPrimaryID2movie_graphql_beᚋgraphᚋmodelᚐPrimaryID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -593,13 +587,13 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_movie_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PrimaryID
+	var arg0 model.Login
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNPrimaryID2movie_graphql_beᚋgraphᚋmodelᚐPrimaryID(ctx, tmp)
+		arg0, err = ec.unmarshalNLogin2movie_graphql_beᚋgraphᚋmodelᚐLogin(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -630,21 +624,6 @@ func (ec *executionContext) field_Mutation_register_args(ctx context.Context, ra
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNRegister2movie_graphql_beᚋgraphᚋmodelᚐRegister(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.PrimaryID
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNPrimaryID2movie_graphql_beᚋgraphᚋmodelᚐPrimaryID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1091,7 +1070,7 @@ func (ec *executionContext) _MovieDetail_reviews(ctx context.Context, field grap
 	return ec.marshalNReview2ᚕᚖmovie_graphql_beᚋgraphᚋmodelᚐReviewᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_movie(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_detailMovie(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1108,7 +1087,7 @@ func (ec *executionContext) _Mutation_movie(ctx context.Context, field graphql.C
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_movie_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_detailMovie_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1116,7 +1095,7 @@ func (ec *executionContext) _Mutation_movie(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Movie(rctx, args["input"].(model.PrimaryID))
+		return ec.resolvers.Mutation().DetailMovie(rctx, args["input"].(model.PrimaryID))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1131,48 +1110,6 @@ func (ec *executionContext) _Mutation_movie(ctx context.Context, field graphql.C
 	res := resTmp.(*model.MovieDetail)
 	fc.Result = res
 	return ec.marshalNMovieDetail2ᚖmovie_graphql_beᚋgraphᚋmodelᚐMovieDetail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_user_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().User(rctx, args["input"].(model.PrimaryID))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.UserDetail)
-	fc.Result = res
-	return ec.marshalNUserDetail2ᚖmovie_graphql_beᚋgraphᚋmodelᚐUserDetail(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_register(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1510,6 +1447,41 @@ func (ec *executionContext) _Review_userId(ctx context.Context, field graphql.Co
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Review_username(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Review",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Username, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Review_review(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
@@ -3663,19 +3635,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "movie":
+		case "detailMovie":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_movie(ctx, field)
-			}
-
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "user":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_user(ctx, field)
+				return ec._Mutation_detailMovie(ctx, field)
 			}
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
@@ -3824,6 +3786,16 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 		case "userId":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Review_userId(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "username":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Review_username(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -4687,20 +4659,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNUserDetail2movie_graphql_beᚋgraphᚋmodelᚐUserDetail(ctx context.Context, sel ast.SelectionSet, v model.UserDetail) graphql.Marshaler {
-	return ec._UserDetail(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNUserDetail2ᚖmovie_graphql_beᚋgraphᚋmodelᚐUserDetail(ctx context.Context, sel ast.SelectionSet, v *model.UserDetail) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._UserDetail(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
