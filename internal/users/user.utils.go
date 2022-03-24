@@ -8,53 +8,73 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func UsernameValidator(username string) (bool, error) {
+func UsernameValidator(username string) error {
 	if len(username) < 6 {
-		return false, fmt.Errorf("username must be at least 6 characters")
+		return fmt.Errorf("username must be at least 6 characters")
 	}
 
 	state, err := mysql.Db.Prepare("SELECT username FROM users WHERE username = ?")
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	rows, err := state.Query(username)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	defer rows.Close()
 
 	if rows.Next() {
-		return true, fmt.Errorf("username is already in use")
+		return fmt.Errorf("username is already in use")
 	}
 
-	return false, nil
+	return nil
 }
 
-func EmailValidator(email string) (bool, error) {
+func GetUserByUsername(username string) error {
+	state, err := mysql.Db.Prepare("SELECT username FROM users WHERE username = ?")
+	if err != nil {
+		return  err
+	}
+
+	rows, err := state.Query(username)
+	if err != nil {
+		return  err
+	}
+
+	defer rows.Close()
+
+	if rows.Next() {
+		return nil
+	}
+
+	return fmt.Errorf("username not exist")
+}
+
+func EmailValidator(email string) error {
 	_, err := mail.ParseAddress(email)
 	if err != nil {
-		return false, fmt.Errorf("email is not valid")
+		return fmt.Errorf("email is not valid")
 	}
 
 	state, err := mysql.Db.Prepare("SELECT email FROM users WHERE email = ?")
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	rows, err := state.Query(email)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	defer rows.Close()
 
 	if rows.Next() {
-		return true, fmt.Errorf("email is already in use")
+		return fmt.Errorf("email is already in use")
 	}
 
-	return false, nil
+	return nil
 }
 
 func HashPassword(password string, confirm string) (string, error) {
@@ -62,7 +82,6 @@ func HashPassword(password string, confirm string) (string, error) {
 		return "", fmt.Errorf("password and confirm password must be same")
 	}
 
-	//password validation
 	if len(password) < 8 {
 		return "", fmt.Errorf("password must be at least 8 characters")
 	}
@@ -73,26 +92,4 @@ func HashPassword(password string, confirm string) (string, error) {
 	}
 
 	return string(bytes), nil
-}
-
-func (login *Login)AuthPassword() (bool, error) {
-	state, err := mysql.Db.Prepare("SELECT password FROM users WHERE username = ?")
-	if err != nil {
-		return false, err
-	}
-
-	row := state.QueryRow(login.Username)
-	var password string
-
-	err = row.Scan(&password)
-	if err != nil {
-		return false, err
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(login.Password))
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
 }

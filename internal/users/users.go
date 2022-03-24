@@ -29,11 +29,11 @@ func (user *User) CreateUser() (string, error) {
 		return "", err
 	}
 
-	if _, err := UsernameValidator(user.Username); err != nil {
+	if err := UsernameValidator(user.Username); err != nil {
 		return "", err
 	}
 
-	if _, err := EmailValidator(user.Email); err != nil {
+	if err := EmailValidator(user.Email); err != nil {
 		return "", err
 	}
 
@@ -56,7 +56,7 @@ func (login *Login) LoginUser() (string, error) {
 		return "", err
 	}
 
-	if result, err := UsernameValidator(login.Username); !result {
+	if err := GetUserByUsername(login.Username); err != nil {
 		return "", err
 	}
 
