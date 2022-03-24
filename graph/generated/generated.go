@@ -493,7 +493,6 @@ type User {
 }
 
 input Register {
-  id: ID!
   username: String!
   email: String!
   firstName: String!
@@ -3394,14 +3393,6 @@ func (ec *executionContext) unmarshalInputRegister(ctx context.Context, obj inte
 
 	for k, v := range asMap {
 		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "username":
 			var err error
 
