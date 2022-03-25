@@ -17,6 +17,7 @@ func (r *mutationResolver) DetailMovie(ctx context.Context, input model.PrimaryI
 
 func (r *mutationResolver) Register(ctx context.Context, input model.Register) (string, error) {
 	var user users.User
+	var login users.Login
 
 	user.Username = input.Username
 	user.Email = input.Email
@@ -24,12 +25,21 @@ func (r *mutationResolver) Register(ctx context.Context, input model.Register) (
 	user.LastName = input.LastName
 	user.Password = input.Password
 	user.ConfirmPassword = input.ConfirmPassword
-	success, err := user.CreateUser()
+	_, err := user.CreateUser()
 	if err != nil {
 		return "", err
 	}
 
-	return success, nil
+	login.Username = user.Username
+	login.Password = user.Password
+	token, err := login.LoginUser()
+	if err != nil {
+		return "", err
+	}
+
+	bearerToken := "Bearer " + token
+
+	return bearerToken, nil
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
@@ -42,7 +52,9 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string
 		return "", err
 	}
 
-	return token, nil
+	berarerToken := "Bearer " + token
+
+	return berarerToken, nil
 }
 
 func (r *mutationResolver) NewReview(ctx context.Context, input model.NewReview) (string, error) {

@@ -2,13 +2,14 @@ package jwt
 
 import (
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
 
 type Payload struct {
-	ID        int64  `json:"id"`
+	ID        float64  `json:"id"`
 	Username  string `json:"username"`
 	Email     string `json:"email"`
 	FirstName string `json:"first_name"`
@@ -34,8 +35,9 @@ func GenerateToken(payload Payload) (string, error) {
 	return tokenString, nil
 }
 
-func ParseToken(token string) (Payload, error) {
-	tkn, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+func ParseToken(bearerToken string) (Payload, error) {
+	token := strings.Split(bearerToken, " ")
+	tkn, err := jwt.Parse(token[1], func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
 	if err != nil {
@@ -44,7 +46,7 @@ func ParseToken(token string) (Payload, error) {
 
 	if claim, ok := tkn.Claims.(jwt.MapClaims); ok && tkn.Valid {
 		claims := Payload{
-			ID: claim["id"].(int64),
+			ID: claim["id"].(float64),
 			Username: claim["username"].(string),
 			Email: claim["email"].(string),
 			FirstName: claim["first_name"].(string),
