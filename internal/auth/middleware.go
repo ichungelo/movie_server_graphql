@@ -2,40 +2,49 @@ package auth
 
 import (
 	"context"
-	"fmt"
+	"movie_graphql_be/pkg/jwt"
 	"net/http"
-	"os"
-
-	"github.com/golang-jwt/jwt"
 )
 
-func JwtMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenString := r.Header.Get("Authorization")
-		if tokenString == "" {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
+var userCtxKey = &contextKey{"user"}
 
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+type contextKey struct {
+	name string
+}
+
+func JwtMiddleware() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			tokenString := r.Header.Get("Authorization")
+
+			if tokenString == "" {
+				next.ServeHTTP(w, r)
+				return
 			}
 
-			return []byte(os.Getenv("JWT_SECRET")), nil
+			payload, err := jwt.ParseToken(tokenString)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusUnauthorized)
+				return
+			}
+
+			userData := jwt.Payload{
+				ID:        payload.ID,
+				Username:  payload.Username,
+				Email:     payload.Email,
+				FirstName: payload.FirstName,
+				LastName:  payload.LastName,
+			}
+
+			ctx := context.WithValue(r.Context(), userCtxKey, &userData)
+
+			r = r.WithContext(ctx)
+			next.ServeHTTP(w, r)
 		})
-
-		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			ctx := context.WithValue(r.Context(), "user_id", claims["user_id"])
-			next.ServeHTTP(w, r.WithContext(ctx))
-		} else {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-	})
+	}
+}
+//? to check authorization in the resolver
+func ForContext(ctx context.Context) *jwt.Payload {
+	raw, _ := ctx.Value(userCtxKey).(*jwt.Payload)
+	return raw
 }

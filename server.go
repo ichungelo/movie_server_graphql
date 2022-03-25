@@ -4,6 +4,7 @@ import (
 	"log"
 	"movie_graphql_be/graph"
 	"movie_graphql_be/graph/generated"
+	"movie_graphql_be/internal/auth"
 	"movie_graphql_be/pkg/db"
 	"net/http"
 	"os"
@@ -29,7 +30,7 @@ func main() {
 
 	router := chi.NewRouter()
 
-
+	router.Use(auth.JwtMiddleware())
 	mysql.InitDB()
 	mysql.Migrate()
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))

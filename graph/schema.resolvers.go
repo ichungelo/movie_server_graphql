@@ -8,11 +8,25 @@ import (
 	"fmt"
 	"movie_graphql_be/graph/generated"
 	"movie_graphql_be/graph/model"
+	"movie_graphql_be/internal/auth"
 	"movie_graphql_be/internal/users"
 )
 
 func (r *mutationResolver) DetailMovie(ctx context.Context, input model.PrimaryID) (*model.MovieDetail, error) {
-	panic(fmt.Errorf("not implemented"))
+	var movie *model.MovieDetail
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return movie, fmt.Errorf("not authorized")
+	}
+
+	dummy := model.MovieDetail{
+		ID:       "1",
+		Title:    "Dummy Movie",
+		Year:     2020,
+		Poster:   "https://m.media-amazon.com/images/M/MV5BMjIxMDgxMzc4MV5BMl5BanBnXkFtZTgwMzQzMzMzMjE@._V1_SX300.jpg",
+		Overview: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+	}
+	return &dummy, nil
 }
 
 func (r *mutationResolver) Register(ctx context.Context, input model.Register) (string, error) {
@@ -58,11 +72,20 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string
 }
 
 func (r *mutationResolver) NewReview(ctx context.Context, input model.NewReview) (string, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return "", fmt.Errorf("not authorized")
+	}
 	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) Movies(ctx context.Context) ([]*model.Movie, error) {
 	var movies []*model.Movie
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return movies, fmt.Errorf("not authorized")
+	}
+	
 	dummy := model.Movie{
 		ID:       "1",
 		Title:    "Dummy Movie",
@@ -73,6 +96,7 @@ func (r *queryResolver) Movies(ctx context.Context) ([]*model.Movie, error) {
 
 	movies = append(movies, &dummy)
 	return movies, nil
+
 }
 
 // Mutation returns generated.MutationResolver implementation.
