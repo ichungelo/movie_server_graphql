@@ -32,25 +32,6 @@ func UsernameValidator(username string) error {
 	return nil
 }
 
-func GetUserByUsername(username string) error {
-	state, err := mysql.Db.Prepare("SELECT username FROM users WHERE username = ?")
-	if err != nil {
-		return  err
-	}
-
-	rows, err := state.Query(username)
-	if err != nil {
-		return  err
-	}
-
-	defer rows.Close()
-
-	if rows.Next() {
-		return nil
-	}
-
-	return fmt.Errorf("username not exist")
-}
 
 func EmailValidator(email string) error {
 	_, err := mail.ParseAddress(email)

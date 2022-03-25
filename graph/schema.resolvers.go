@@ -9,24 +9,51 @@ import (
 	"movie_graphql_be/graph/generated"
 	"movie_graphql_be/graph/model"
 	"movie_graphql_be/internal/auth"
+	"movie_graphql_be/internal/movies"
+	"movie_graphql_be/internal/reviews"
 	"movie_graphql_be/internal/users"
 )
 
 func (r *mutationResolver) DetailMovie(ctx context.Context, input model.PrimaryID) (*model.MovieDetail, error) {
-	var movie *model.MovieDetail
+	var resultMovie *model.MovieDetail
+	var resultReviews []*model.Review
 	user := auth.ForContext(ctx)
 	if user == nil {
-		return movie, fmt.Errorf("not authorized")
+		return nil, fmt.Errorf("not authorized")
 	}
 
-	dummy := model.MovieDetail{
-		ID:       "1",
-		Title:    "Dummy Movie",
-		Year:     2020,
-		Poster:   "https://m.media-amazon.com/images/M/MV5BMjIxMDgxMzc4MV5BMl5BanBnXkFtZTgwMzQzMzMzMjE@._V1_SX300.jpg",
-		Overview: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+	dbMovie, err := movies.GetByID(input.ID)
+	if err != nil {
+		return nil, err
 	}
-	return &dummy, nil
+
+	dbReviews, err := reviews.GetAllReviewsByID(input.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, dbReviews := range dbReviews {
+		resultReviews = append(resultReviews, &model.Review{
+			ID:       dbReviews.ID,
+			MovieID:  dbReviews.MovieID,
+			UserID:   dbReviews.UserID,
+			Username: dbReviews.Username,
+			Review:   dbReviews.Review,
+			CreatedAt: dbReviews.CreatedAt,
+			UpdatedAt: dbReviews.UpdatedAt,
+		})
+	}
+
+	resultMovie = &model.MovieDetail{
+		ID:       dbMovie.ID,
+		Title:    dbMovie.Title,
+		Year:     dbMovie.Year,
+		Poster:   dbMovie.Poster,
+		Overview: dbMovie.Overview,
+		Reviews: resultReviews,
+	}
+
+	return resultMovie, nil
 }
 
 func (r *mutationResolver) Register(ctx context.Context, input model.Register) (string, error) {
@@ -80,23 +107,28 @@ func (r *mutationResolver) NewReview(ctx context.Context, input model.NewReview)
 }
 
 func (r *queryResolver) Movies(ctx context.Context) ([]*model.Movie, error) {
-	var movies []*model.Movie
+	var result []*model.Movie
 	user := auth.ForContext(ctx)
 	if user == nil {
-		return movies, fmt.Errorf("not authorized")
-	}
-	
-	dummy := model.Movie{
-		ID:       "1",
-		Title:    "Dummy Movie",
-		Year:     2020,
-		Poster:   "https://m.media-amazon.com/images/M/MV5BMjIxMDgxMzc4MV5BMl5BanBnXkFtZTgwMzQzMzMzMjE@._V1_SX300.jpg",
-		Overview: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+		return nil, fmt.Errorf("not authorized")
 	}
 
-	movies = append(movies, &dummy)
-	return movies, nil
+	dbMovies, err := movies.GetAll()
+	if err != nil {
+		return nil, err
+	}
 
+	for _, dbMovie := range dbMovies {
+		result = append(result, &model.Movie{
+			ID:       dbMovie.ID,
+			Title:    dbMovie.Title,
+			Year:     dbMovie.Year,
+			Poster:   dbMovie.Poster,
+			Overview: dbMovie.Overview,
+		})
+	}
+
+	return result, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
