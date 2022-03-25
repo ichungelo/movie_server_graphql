@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"movie_graphql_be/graph/generated"
 	"movie_graphql_be/graph/model"
+	"movie_graphql_be/internal/users"
 )
 
 func (r *mutationResolver) DetailMovie(ctx context.Context, input model.PrimaryID) (*model.MovieDetail, error) {
@@ -15,20 +16,45 @@ func (r *mutationResolver) DetailMovie(ctx context.Context, input model.PrimaryI
 }
 
 func (r *mutationResolver) Register(ctx context.Context, input model.Register) (string, error) {
-	register := model.Register{
-		Username:        input.Username,
-		Email:           input.Email,
-		FirstName:       input.FirstName,
-		LastName:        input.LastName,
-		Password:        input.Password,
-		ConfirmPassword: input.ConfirmPassword,
+	var user users.User
+	var login users.Login
+
+	user.Username = input.Username
+	user.Email = input.Email
+	user.FirstName = input.FirstName
+	user.LastName = input.LastName
+	user.Password = input.Password
+	user.ConfirmPassword = input.ConfirmPassword
+	_, err := user.CreateUser()
+	if err != nil {
+		return "", err
 	}
 
-	return fmt.Sprintf("%s %s %s %s", register.Username, register.Email, register.FirstName, register.LastName), nil
+	login.Username = user.Username
+	login.Password = user.Password
+	token, err := login.LoginUser()
+	if err != nil {
+		return "", err
+	}
+
+	bearerToken := "Bearer " + token
+
+	return bearerToken, nil
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	var login users.Login
+	login.Username = input.Username
+	login.Password = input.Password
+
+	token, err := login.LoginUser()
+	if err != nil {
+		return "", err
+	}
+
+	berarerToken := "Bearer " + token
+
+	return berarerToken, nil
 }
 
 func (r *mutationResolver) NewReview(ctx context.Context, input model.NewReview) (string, error) {

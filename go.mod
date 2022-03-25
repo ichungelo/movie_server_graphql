@@ -9,6 +9,7 @@ require (
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/joho/godotenv v1.4.0
 	github.com/vektah/gqlparser/v2 v2.4.0
+	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 )
 
 require (
@@ -20,6 +21,8 @@ require (
 	github.com/docker/docker v20.10.9+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
+	github.com/go-chi/chi v1.5.4
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/matryer/moq v0.2.3 // indirect

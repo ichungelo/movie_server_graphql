@@ -2,26 +2,30 @@ package jwt
 
 import (
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
 
+type Payload struct {
+	ID        float64  `json:"id"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
 
 var secretKey = []byte(os.Getenv("SECRET_KEY"))
-type Payload struct {
-	ID int `json:"id"`
-	Username string `json:"username"`
-	FirstName string `json:"first_name"`
-	LastName string `json:"last_name"`
-}
+
 func GenerateToken(payload Payload) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id": payload.ID,
 		"username": payload.Username,
+		"email": payload.Email,
 		"first_name": payload.FirstName,
 		"last_name": payload.LastName,
-		"exp": time.Now().Add(time.Minute * 1).Unix(),
+		"exp": time.Now().Add(time.Hour * 1).Unix(),
 	})
 	
 	tokenString, err := token.SignedString(secretKey)
@@ -31,8 +35,9 @@ func GenerateToken(payload Payload) (string, error) {
 	return tokenString, nil
 }
 
-func ParseToken(token string) (Payload, error) {
-	tkn, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+func ParseToken(bearerToken string) (Payload, error) {
+	token := strings.Split(bearerToken, " ")
+	tkn, err := jwt.Parse(token[1], func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
 	if err != nil {
@@ -41,8 +46,9 @@ func ParseToken(token string) (Payload, error) {
 
 	if claim, ok := tkn.Claims.(jwt.MapClaims); ok && tkn.Valid {
 		claims := Payload{
-			ID: int(claim["id"].(float64)),
+			ID: claim["id"].(float64),
 			Username: claim["username"].(string),
+			Email: claim["email"].(string),
 			FirstName: claim["first_name"].(string),
 			LastName: claim["last_name"].(string),
 		}
