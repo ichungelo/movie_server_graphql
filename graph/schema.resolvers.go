@@ -103,7 +103,19 @@ func (r *mutationResolver) NewReview(ctx context.Context, input model.NewReview)
 	if user == nil {
 		return "", fmt.Errorf("not authorized")
 	}
-	panic(fmt.Errorf("not implemented"))
+
+	var inputReview reviews.CreateReview
+
+	inputReview.MovieID = input.MovieID
+	inputReview.UserID = fmt.Sprint(user.ID)
+	inputReview.Review = input.Review
+
+	_, err := reviews.CreateReviewByID(inputReview)
+	if err != nil {
+		return "", err
+	}
+
+	return "Success Added", nil
 }
 
 func (r *queryResolver) Movies(ctx context.Context) ([]*model.Movie, error) {
