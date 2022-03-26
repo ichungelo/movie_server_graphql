@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"log"
 	"movie_graphql_be/graph/generated"
 	"movie_graphql_be/graph/model"
 	"movie_graphql_be/internal/auth"
@@ -19,26 +20,30 @@ func (r *mutationResolver) DetailMovie(ctx context.Context, input model.PrimaryI
 	var resultReviews []*model.Review
 	user := auth.ForContext(ctx)
 	if user == nil {
-		return nil, fmt.Errorf("not authorized")
+		err := fmt.Errorf("not authorized")
+		log.Println(err)
+		return nil, err
 	}
 
 	dbMovie, err := movies.GetByID(input.ID)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
 	dbReviews, err := reviews.GetAllReviewsByID(input.ID)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
 	for _, dbReviews := range dbReviews {
 		resultReviews = append(resultReviews, &model.Review{
-			ID:       dbReviews.ID,
-			MovieID:  dbReviews.MovieID,
-			UserID:   dbReviews.UserID,
-			Username: dbReviews.Username,
-			Review:   dbReviews.Review,
+			ID:        dbReviews.ID,
+			MovieID:   dbReviews.MovieID,
+			UserID:    dbReviews.UserID,
+			Username:  dbReviews.Username,
+			Review:    dbReviews.Review,
 			CreatedAt: dbReviews.CreatedAt,
 			UpdatedAt: dbReviews.UpdatedAt,
 		})
@@ -50,7 +55,7 @@ func (r *mutationResolver) DetailMovie(ctx context.Context, input model.PrimaryI
 		Year:     dbMovie.Year,
 		Poster:   dbMovie.Poster,
 		Overview: dbMovie.Overview,
-		Reviews: resultReviews,
+		Reviews:  resultReviews,
 	}
 
 	return resultMovie, nil
@@ -68,6 +73,7 @@ func (r *mutationResolver) Register(ctx context.Context, input model.Register) (
 	user.ConfirmPassword = input.ConfirmPassword
 	_, err := user.CreateUser()
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
@@ -75,6 +81,7 @@ func (r *mutationResolver) Register(ctx context.Context, input model.Register) (
 	login.Password = user.Password
 	token, err := login.LoginUser()
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
@@ -90,6 +97,7 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string
 
 	token, err := login.LoginUser()
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
@@ -101,32 +109,81 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string
 func (r *mutationResolver) NewReview(ctx context.Context, input model.NewReview) (string, error) {
 	user := auth.ForContext(ctx)
 	if user == nil {
-		return "", fmt.Errorf("not authorized")
+		err := fmt.Errorf("not authorized")
+		log.Println(err)
+		return "", err
 	}
 
-	var inputReview reviews.CreateReview
+	var inputReview reviews.Review
 
 	inputReview.MovieID = input.MovieID
 	inputReview.UserID = fmt.Sprint(user.ID)
 	inputReview.Review = input.Review
 
-	_, err := reviews.CreateReviewByID(inputReview)
+	success, err := reviews.CreateReviewByID(inputReview)
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
-	return "Success Added", nil
+	return success, nil
+}
+
+func (r *mutationResolver) EditReview(ctx context.Context, input model.EditReview) (string, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		err := fmt.Errorf("not authorized")
+		log.Println(err)
+		return "", err
+	}
+
+	var editReview reviews.Review
+	editReview.Review = input.Review
+	editReview.ReviewID = input.ID
+	editReview.UserID = fmt.Sprint(user.ID)
+
+	success, err := reviews.EditReviewByID(editReview)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	return success, nil
+}
+
+func (r *mutationResolver) DeleteReview(ctx context.Context, input model.DeleteReview) (string, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		err := fmt.Errorf("not authorized")
+		log.Println(err)
+		return "", err
+	}
+
+	var deleteReview reviews.Review
+	deleteReview.ReviewID = input.ID
+	deleteReview.UserID = fmt.Sprint(user.ID)
+
+	success, err := reviews.DeleteReviewByID(deleteReview)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	return success, nil
 }
 
 func (r *queryResolver) Movies(ctx context.Context) ([]*model.Movie, error) {
 	var result []*model.Movie
 	user := auth.ForContext(ctx)
 	if user == nil {
-		return nil, fmt.Errorf("not authorized")
+		err := fmt.Errorf("not authorized")
+		log.Println(err)
+		return nil, err
 	}
 
 	dbMovies, err := movies.GetAll()
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 

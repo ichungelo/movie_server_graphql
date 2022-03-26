@@ -49,6 +49,15 @@ input NewReview {
   review: String!
 }
 
+input EditReview {
+  id: ID!
+  review: String!
+}
+
+input DeleteReview {
+  id: ID!
+}
+
 type MovieDetail {
   id: ID!
   title: String!
@@ -82,4 +91,6 @@ type Mutation {
   register(input: Register!): String!
   login(input: Login!): String!
   newReview(input: NewReview!): String!
+  editReview(input: EditReview!): String!
+  deleteReview(input: DeleteReview!): String!
 }

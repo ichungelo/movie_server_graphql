@@ -1,6 +1,7 @@
 package movies
 
 import (
+	"log"
 	"movie_graphql_be/graph/model"
 	mysql "movie_graphql_be/pkg/db"
 )
@@ -8,11 +9,13 @@ import (
 func GetAll() ([]model.Movie, error) {
 	state, err := mysql.Db.Prepare("SELECT id, title, release_year, production, overview FROM movies")
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
 	rows, err := state.Query()
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -24,12 +27,14 @@ func GetAll() ([]model.Movie, error) {
 		var movie model.Movie
 		err := rows.Scan(&movie.ID, &movie.Title, &movie.Year, &movie.Poster, &movie.Overview)
 		if err != nil {
+			log.Println(err)
 			return nil, err
 		}
 		movies = append(movies, movie)
 	}
 
 	if err := rows.Err(); err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -39,11 +44,13 @@ func GetAll() ([]model.Movie, error) {
 func GetByID(id string) (model.Movie, error) {
 	state, err := mysql.Db.Prepare("SELECT id, title, release_year, production, overview FROM movies WHERE id = ?")
 	if err != nil {
+		log.Println(err)
 		return model.Movie{}, err
 	}
 
 	rows, err := state.Query(id)
 	if err != nil {
+		log.Println(err)
 		return model.Movie{}, err
 	}
 
@@ -53,11 +60,13 @@ func GetByID(id string) (model.Movie, error) {
 	if rows.Next() {
 		err := rows.Scan(&movie.ID, &movie.Title, &movie.Year, &movie.Poster, &movie.Overview)
 		if err != nil {
+			log.Println(err)
 			return model.Movie{}, err
 		}
 	}
 
 	if err := rows.Err(); err != nil {
+		log.Println(err)
 		return model.Movie{}, err
 	}
 

@@ -2,6 +2,7 @@ package users
 
 import (
 	"fmt"
+	"log"
 	mysql "movie_graphql_be/pkg/db"
 	"movie_graphql_be/pkg/jwt"
 
@@ -9,13 +10,13 @@ import (
 )
 
 type User struct {
-	ID              float64  `json:"id"`
-	Username        string `json:"username"`
-	Email           string `json:"email"`
-	FirstName       string `json:"first_name"`
-	LastName        string `json:"last_name"`
-	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirm_password"`
+	ID              float64 `json:"id"`
+	Username        string  `json:"username"`
+	Email           string  `json:"email"`
+	FirstName       string  `json:"first_name"`
+	LastName        string  `json:"last_name"`
+	Password        string  `json:"password"`
+	ConfirmPassword string  `json:"confirm_password"`
 }
 
 type Login struct {
@@ -26,25 +27,41 @@ type Login struct {
 func (user *User) CreateUser() (string, error) {
 	state, err := mysql.Db.Prepare("INSERT INTO users (username, email, first_name, last_name, password) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
 	if err := UsernameValidator(user.Username); err != nil {
+		log.Println(err)
 		return "", err
 	}
 
 	if err := EmailValidator(user.Email); err != nil {
+		log.Println(err)
 		return "", err
 	}
 
 	hashedPass, err := HashPassword(user.Password, user.ConfirmPassword)
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
-	_, err = state.Exec(user.Username, user.Email, user.FirstName, user.LastName, hashedPass)
+	affect, err := state.Exec(user.Username, user.Email, user.FirstName, user.LastName, hashedPass)
 	if err != nil {
+		log.Println(err)
 		return "", err
+	}
+
+	result, err := affect.RowsAffected()
+	if err != nil {
+		log.Println(err)
+		return "", nil
+	}
+
+	if result == 0 {
+		log.Println(err)
+		return "", fmt.Errorf("error add user")
 	}
 
 	return "Register Success", nil
@@ -53,10 +70,12 @@ func (user *User) CreateUser() (string, error) {
 func (login *Login) LoginUser() (string, error) {
 	state, err := mysql.Db.Prepare("SELECT id, username, email, first_name, last_name, password FROM users WHERE username = ?")
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
 	if err := GetUserByUsername(login.Username); err != nil {
+		log.Println(err)
 		return "", err
 	}
 
@@ -78,11 +97,13 @@ func (login *Login) LoginUser() (string, error) {
 		&result.Password,
 	)
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(login.Password))
 	if err != nil {
+		log.Println(err)
 		return "", fmt.Errorf("password is not correct")
 	}
 
@@ -96,6 +117,7 @@ func (login *Login) LoginUser() (string, error) {
 
 	token, err := jwt.GenerateToken(payload)
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
@@ -105,12 +127,14 @@ func (login *Login) LoginUser() (string, error) {
 func GetUserByUsername(username string) error {
 	state, err := mysql.Db.Prepare("SELECT username FROM users WHERE username = ?")
 	if err != nil {
-		return  err
+		log.Println(err)
+		return err
 	}
 
 	rows, err := state.Query(username)
 	if err != nil {
-		return  err
+		log.Println(err)
+		return err
 	}
 
 	defer rows.Close()
