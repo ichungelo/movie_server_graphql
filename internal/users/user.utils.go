@@ -2,6 +2,7 @@ package users
 
 import (
 	"fmt"
+	"log"
 	mysql "movie_graphql_be/pkg/db"
 	"net/mail"
 
@@ -15,11 +16,13 @@ func UsernameValidator(username string) error {
 
 	state, err := mysql.Db.Prepare("SELECT username FROM users WHERE username = ?")
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
 	rows, err := state.Query(username)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
@@ -32,25 +35,6 @@ func UsernameValidator(username string) error {
 	return nil
 }
 
-func GetUserByUsername(username string) error {
-	state, err := mysql.Db.Prepare("SELECT username FROM users WHERE username = ?")
-	if err != nil {
-		return  err
-	}
-
-	rows, err := state.Query(username)
-	if err != nil {
-		return  err
-	}
-
-	defer rows.Close()
-
-	if rows.Next() {
-		return nil
-	}
-
-	return fmt.Errorf("username not exist")
-}
 
 func EmailValidator(email string) error {
 	_, err := mail.ParseAddress(email)
@@ -60,11 +44,13 @@ func EmailValidator(email string) error {
 
 	state, err := mysql.Db.Prepare("SELECT email FROM users WHERE email = ?")
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
 	rows, err := state.Query(email)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
@@ -79,15 +65,20 @@ func EmailValidator(email string) error {
 
 func HashPassword(password string, confirm string) (string, error) {
 	if password != confirm {
-		return "", fmt.Errorf("password and confirm password must be same")
+		err := fmt.Errorf("password and confirm password must be same")
+		log.Println(err)
+		return "", err
 	}
 
 	if len(password) < 8 {
-		return "", fmt.Errorf("password must be at least 8 characters")
+		err := fmt.Errorf("password must be at least 8 characters")
+		log.Println(err)
+		return "", err
 	}
 
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 

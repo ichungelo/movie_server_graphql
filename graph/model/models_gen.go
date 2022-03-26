@@ -2,6 +2,15 @@
 
 package model
 
+type DeleteReview struct {
+	ID string `json:"id"`
+}
+
+type EditReview struct {
+	ID     string `json:"id"`
+	Review string `json:"review"`
+}
+
 type Login struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
