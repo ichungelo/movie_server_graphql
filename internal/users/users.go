@@ -104,7 +104,7 @@ func (login *Login) LoginUser() (string, error) {
 	err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(login.Password))
 	if err != nil {
 		log.Println(err)
-		return "", fmt.Errorf("password is not correct")
+		return "", fmt.Errorf("password incorrect")
 	}
 
 	payload := jwt.Payload{

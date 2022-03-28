@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -28,18 +29,24 @@ func GenerateToken(payload Payload) (string, error) {
 		"exp": time.Now().Add(time.Hour * 1).Unix(),
 	})
 	
-	tokenString, err := token.SignedString(secretKey)
-	if err != nil {
-		return "", err
-	}
+	tokenString, _ := token.SignedString(secretKey)
 	return tokenString, nil
 }
 
 func ParseToken(bearerToken string) (Payload, error) {
 	token := strings.Split(bearerToken, " ")
+	if len(token) <= 1 {
+		return Payload{}, fmt.Errorf("token is invalid")
+	}
+
+	if token[0] != "Bearer" {
+		return Payload{}, fmt.Errorf("token is invalid")
+	}
+
 	tkn, err := jwt.Parse(token[1], func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
+
 	if err != nil {
 		return Payload{}, err
 	}
