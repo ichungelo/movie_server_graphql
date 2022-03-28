@@ -3,11 +3,14 @@ package users
 import (
 	"fmt"
 	"log"
-	mysql "movie_graphql_be/pkg/db"
+	"movie_graphql_be/pkg/db/mysql"
 	"movie_graphql_be/pkg/jwt"
+	"os"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+var secretKey = []byte(os.Getenv("SECRET_KEY"))
 
 type User struct {
 	ID              float64 `json:"id"`
@@ -115,7 +118,7 @@ func (login *Login) LoginUser() (string, error) {
 		LastName:  result.LastName,
 	}
 
-	token, err := jwt.GenerateToken(payload)
+	token, err := jwt.GenerateToken(payload, secretKey)
 	if err != nil {
 		log.Println(err)
 		return "", err

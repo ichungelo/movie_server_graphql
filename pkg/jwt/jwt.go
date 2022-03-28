@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -17,9 +16,7 @@ type Payload struct {
 	LastName  string `json:"last_name"`
 }
 
-var secretKey = []byte(os.Getenv("SECRET_KEY"))
-
-func GenerateToken(payload Payload) (string, error) {
+func GenerateToken(payload Payload, secret []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id": payload.ID,
 		"username": payload.Username,
@@ -29,11 +26,14 @@ func GenerateToken(payload Payload) (string, error) {
 		"exp": time.Now().Add(time.Hour * 1).Unix(),
 	})
 	
-	tokenString, _ := token.SignedString(secretKey)
+	tokenString, err := token.SignedString(secret)
+	if err != nil {
+		return "", err
+	}
 	return tokenString, nil
 }
 
-func ParseToken(bearerToken string) (Payload, error) {
+func ParseToken(bearerToken string, secret []byte) (Payload, error) {
 	token := strings.Split(bearerToken, " ")
 	if len(token) <= 1 {
 		return Payload{}, fmt.Errorf("token is invalid")
@@ -44,7 +44,7 @@ func ParseToken(bearerToken string) (Payload, error) {
 	}
 
 	tkn, err := jwt.Parse(token[1], func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
+		return secret, nil
 	})
 
 	if err != nil {

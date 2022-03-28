@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"movie_graphql_be/graph/model"
-	mysql "movie_graphql_be/pkg/db"
+	"movie_graphql_be/pkg/db/mysql"
 	"time"
 )
 

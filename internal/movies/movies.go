@@ -3,7 +3,7 @@ package movies
 import (
 	"log"
 	"movie_graphql_be/graph/model"
-	mysql "movie_graphql_be/pkg/db"
+	"movie_graphql_be/pkg/db/mysql"
 )
 
 func GetAll() ([]model.Movie, error) {

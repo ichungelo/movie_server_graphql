@@ -5,7 +5,7 @@ import (
 	"movie_graphql_be/graph"
 	"movie_graphql_be/graph/generated"
 	"movie_graphql_be/internal/auth"
-	"movie_graphql_be/pkg/db"
+	"movie_graphql_be/pkg/db/mysql"
 	"net/http"
 	"os"
 
