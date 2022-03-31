@@ -57,7 +57,7 @@ func (r *mutationResolver) DetailMovie(ctx context.Context, input model.PrimaryI
 		Overview: dbMovie.Overview,
 		Reviews:  resultReviews,
 	}
-
+	
 	return resultMovie, nil
 }
 

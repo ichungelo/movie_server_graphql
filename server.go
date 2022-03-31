@@ -5,13 +5,14 @@ import (
 	"movie_graphql_be/graph"
 	"movie_graphql_be/graph/generated"
 	"movie_graphql_be/internal/auth"
-	"movie_graphql_be/pkg/db"
+	"movie_graphql_be/pkg/db/mysql"
 	"net/http"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 )
 const defaultHost = "localhost"
@@ -30,9 +31,11 @@ func main() {
 
 	router := chi.NewRouter()
 
+	router.Use(cors.AllowAll().Handler)
 	router.Use(auth.JwtMiddleware())
 	mysql.InitDB()
 	mysql.Migrate()
+	
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))

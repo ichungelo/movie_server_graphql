@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -19,7 +20,7 @@ type Payload struct {
 
 var secretKey = []byte(os.Getenv("SECRET_KEY"))
 
-func GenerateToken(payload Payload) (string, error) {
+func GenerateToken(payload Payload, secret []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id": payload.ID,
 		"username": payload.Username,
@@ -29,7 +30,10 @@ func GenerateToken(payload Payload) (string, error) {
 		"exp": time.Now().Add(time.Hour * 1).Unix(),
 	})
 	
-	tokenString, _ := token.SignedString(secretKey)
+	tokenString, err := token.SignedString(secret)
+	if err != nil {
+		return "", err
+	}
 	return tokenString, nil
 }
 
@@ -48,6 +52,7 @@ func ParseToken(bearerToken string) (Payload, error) {
 	})
 
 	if err != nil {
+		log.Println(err)
 		return Payload{}, err
 	}
 
