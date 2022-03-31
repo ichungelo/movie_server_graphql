@@ -71,6 +71,7 @@ func (user *User) CreateUser() (string, error) {
 }
 
 func (login *Login) LoginUser() (string, error) {
+
 	state, err := mysql.Db.Prepare("SELECT id, username, email, first_name, last_name, password FROM users WHERE username = ?")
 	if err != nil {
 		log.Println(err)

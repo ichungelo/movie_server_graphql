@@ -15,9 +15,9 @@ var expectedPayload = Payload{
 	LastName: "testing",
 }
 
-var secretKey = []byte("secret test")
+var dummySecret = []byte("secret test")
 func TestGenerateTokenSuccess(t *testing.T) {
-	token,err := GenerateToken(expectedPayload, secretKey)
+	token,err := GenerateToken(expectedPayload, dummySecret)
 	assert.NotNil(t, token)
 	assert.Nil(t, err)
 }
@@ -29,9 +29,9 @@ func TestGenerateTokenSuccess(t *testing.T) {
 // }
 
 func TestParseTokenSuccess (t *testing.T) {
-	token, _ := GenerateToken(expectedPayload, secretKey)
+	token, _ := GenerateToken(expectedPayload, dummySecret)
 
-	payload, err := ParseToken("Bearer " + token, secretKey)
+	payload, err := ParseToken("Bearer " + token)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedPayload.ID, payload.ID)
 	assert.Equal(t, expectedPayload.Username, payload.Username)
@@ -41,7 +41,7 @@ func TestParseTokenSuccess (t *testing.T) {
 }
 
 func TestParseTokenError (t *testing.T) {
-	token, _ := GenerateToken(expectedPayload, secretKey)
+	token, _ := GenerateToken(expectedPayload, dummySecret)
 
 	expectedError := []struct{
 		token string
@@ -49,11 +49,11 @@ func TestParseTokenError (t *testing.T) {
 	}{
 		{
 			token: token,
-			secretKey: secretKey,
+			secretKey: dummySecret,
 		},
 		{
 			token: fmt.Sprint("falseBearer " + token),
-			secretKey: secretKey,
+			secretKey: dummySecret,
 		},
 		{
 			token: fmt.Sprint("Bearer " + token),
@@ -62,7 +62,7 @@ func TestParseTokenError (t *testing.T) {
 	}
 
 	for _, error := range expectedError {
-		payload, err := ParseToken(error.token, error.secretKey)
+		payload, err := ParseToken(error.token)
 		assert.Equal(t, Payload{}, payload)
 		assert.NotNil(t, err)
 	}

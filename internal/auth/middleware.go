@@ -4,7 +4,6 @@ import (
 	"context"
 	"movie_graphql_be/pkg/jwt"
 	"net/http"
-	"os"
 )
 
 var userCtxKey = &contextKey{"user"}
@@ -17,14 +16,13 @@ func JwtMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			tokenString := r.Header.Get("Authorization")
-			secretKey := []byte(os.Getenv("SECRET_KEY"))
 
 			if tokenString == "" {
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			payload, err := jwt.ParseToken(tokenString, secretKey)
+			payload, err := jwt.ParseToken(tokenString)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusUnauthorized)
 				return

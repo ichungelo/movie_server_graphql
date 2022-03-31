@@ -31,7 +31,8 @@ func GetAllReviewsByID(movieID string) ([]model.Review, error) {
 	defer rows.Close()
 
 	var reviews []model.Review
-	if rows.Next() {
+
+	for rows.Next() {
 		var review model.Review
 		err := rows.Scan(&review.ID, &review.MovieID, &review.UserID, &review.Username, &review.Review, &review.CreatedAt, &review.UpdatedAt)
 		if err != nil {
@@ -44,7 +45,7 @@ func GetAllReviewsByID(movieID string) ([]model.Review, error) {
 		log.Println(err)
 		return nil, err
 	}
-
+	
 	return reviews, nil
 }
 
