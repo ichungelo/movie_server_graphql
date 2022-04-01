@@ -7,7 +7,7 @@ import (
 )
 
 func GetAll() ([]model.Movie, error) {
-	state, err := mysql.Db.Prepare("SELECT id, title, release_year, production, overview FROM movies")
+	state, err := mysql.Db.Prepare("SELECT id, title, year, poster, overview FROM movies")
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -42,7 +42,7 @@ func GetAll() ([]model.Movie, error) {
 }
 
 func GetByID(id string) (model.Movie, error) {
-	state, err := mysql.Db.Prepare("SELECT id, title, release_year, production, overview FROM movies WHERE id = ?")
+	state, err := mysql.Db.Prepare("SELECT id, title, year, poster, overview FROM movies WHERE id = ?")
 	if err != nil {
 		log.Println(err)
 		return model.Movie{}, err
