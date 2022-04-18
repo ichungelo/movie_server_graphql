@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  grqphql_movie:
+    container_name: movie
+    image: ichungelo/movie-graphql_api:1.0
+    restart: always
+    environtment:
+      DB_NAME: "movie_app_graphql"
+      DB_USER: "root"
+      DB_PASSWORD: "password"
+      DB_HOST: "mysql"
+      DB_PORT: "3306"
+      CONN_HOST: "0.0.0.0"
+      CONN_PORT: "7000"
+    expose:
+      - "7000"
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    restart: always
+    environtment:
+      MYSQL_ROOT_PASSWORD: "password"
+      MYSQL_DATABASE: "movie_app_graphql"
+      MYSQL_USER: "root"
+      MYSQL_PASSWORD: "password"
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"

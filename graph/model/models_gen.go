@@ -2,19 +2,82 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type DeleteReview struct {
+	ID string `json:"id"`
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type EditReview struct {
+	ID     string `json:"id"`
+	Review string `json:"review"`
+}
+
+type Login struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type Movie struct {
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Year     int    `json:"year"`
+	Poster   string `json:"poster"`
+	Overview string `json:"overview"`
+}
+
+type MovieDetail struct {
+	ID       string    `json:"id"`
+	Title    string    `json:"title"`
+	Year     int       `json:"year"`
+	Poster   string    `json:"poster"`
+	Overview string    `json:"overview"`
+	Reviews  []*Review `json:"reviews"`
+}
+
+type NewReview struct {
+	MovieID string `json:"movieId"`
+	Review  string `json:"review"`
+}
+
+type PrimaryID struct {
+	ID string `json:"id"`
+}
+
+type Register struct {
+	Username        string `json:"username"`
+	Email           string `json:"email"`
+	FirstName       string `json:"firstName"`
+	LastName        string `json:"lastName"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirmPassword"`
+}
+
+type Review struct {
+	ID        string `json:"id"`
+	MovieID   string `json:"movieId"`
+	UserID    string `json:"userId"`
+	Username  string `json:"username"`
+	Review    string `json:"review"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID        string `json:"id"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+type UserDetail struct {
+	ID        string    `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	FirstName string    `json:"firstName"`
+	LastName  string    `json:"lastName"`
+	CreatedAt string    `json:"createdAt"`
+	UpdatedAt string    `json:"updatedAt"`
+	Reviews   []*Review `json:"reviews"`
 }

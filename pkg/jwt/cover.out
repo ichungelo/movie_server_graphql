@@ -1,0 +1,15 @@
+mode: set
+movie_graphql_be/pkg/jwt/jwt.go:19.68,30.16 3 1
+movie_graphql_be/pkg/jwt/jwt.go:33.2,33.25 1 1
+movie_graphql_be/pkg/jwt/jwt.go:30.16,32.3 1 0
+movie_graphql_be/pkg/jwt/jwt.go:36.69,38.21 2 1
+movie_graphql_be/pkg/jwt/jwt.go:42.2,42.26 1 1
+movie_graphql_be/pkg/jwt/jwt.go:46.2,46.78 1 1
+movie_graphql_be/pkg/jwt/jwt.go:50.2,50.16 1 1
+movie_graphql_be/pkg/jwt/jwt.go:54.2,54.62 1 1
+movie_graphql_be/pkg/jwt/jwt.go:38.21,40.3 1 1
+movie_graphql_be/pkg/jwt/jwt.go:42.26,44.3 1 1
+movie_graphql_be/pkg/jwt/jwt.go:46.78,48.3 1 1
+movie_graphql_be/pkg/jwt/jwt.go:50.16,52.3 1 1
+movie_graphql_be/pkg/jwt/jwt.go:54.62,63.3 2 1
+movie_graphql_be/pkg/jwt/jwt.go:63.8,65.3 1 0

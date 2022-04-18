@@ -2,27 +2,95 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
-}
-
 type User {
   id: ID!
-  name: String!
+  username: String!
+  email: String!
+  firstName: String!
+  lastName: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input Register {
+  username: String!
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  confirmPassword: String!
+}
+
+input Login {
+  username: String!
+  password: String!
+}
+
+type Movie {
+  id: ID!
+  title: String!
+  year: Int!
+  poster: String!
+  overview: String!
+}
+
+type Review {
+  id: ID!
+  movieId: ID!
+  userId: ID!
+  username: String!
+  review: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input NewReview {
+  movieId: ID!
+  review: String!
+}
+
+input EditReview {
+  id: ID!
+  review: String!
+}
+
+input DeleteReview {
+  id: ID!
+}
+
+type MovieDetail {
+  id: ID!
+  title: String!
+  year: Int!
+  poster: String!
+  overview: String!
+  reviews: [Review!]!
+}
+
+type UserDetail {
+  id: ID!
+  username: String!
+  email: String!
+  firstName: String!
+  lastName: String!
+  createdAt: String!
+  updatedAt: String!
+  reviews: [Review!]!
+}
+
+input PrimaryID {
+  id: ID!
 }
 
 type Query {
-  todos: [Todo!]!
-}
-
-input NewTodo {
-  text: String!
-  userId: String!
+  movies: [Movie!]!
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  detailMovie(input: PrimaryID!): MovieDetail!
+  register(input: Register!): String!
+  login(input: Login!): String!
+  newReview(input: NewReview!): String!
+  editReview(input: EditReview!): String!
+  deleteReview(input: DeleteReview!): String!
 }
