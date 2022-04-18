@@ -62,7 +62,6 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		DeleteReview func(childComplexity int, input model.DeleteReview) int
-		DetailMovie  func(childComplexity int, input model.PrimaryID) int
 		EditReview   func(childComplexity int, input model.EditReview) int
 		Login        func(childComplexity int, input model.Login) int
 		NewReview    func(childComplexity int, input model.NewReview) int
@@ -70,7 +69,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Movies func(childComplexity int) int
+		DetailMovie func(childComplexity int, input model.PrimaryID) int
+		Movies      func(childComplexity int) int
 	}
 
 	Review struct {
@@ -106,7 +106,6 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	DetailMovie(ctx context.Context, input model.PrimaryID) (*model.MovieDetail, error)
 	Register(ctx context.Context, input model.Register) (string, error)
 	Login(ctx context.Context, input model.Login) (string, error)
 	NewReview(ctx context.Context, input model.NewReview) (string, error)
@@ -115,6 +114,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Movies(ctx context.Context) ([]*model.Movie, error)
+	DetailMovie(ctx context.Context, input model.PrimaryID) (*model.MovieDetail, error)
 }
 
 type executableSchema struct {
@@ -221,18 +221,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteReview(childComplexity, args["input"].(model.DeleteReview)), true
 
-	case "Mutation.detailMovie":
-		if e.complexity.Mutation.DetailMovie == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_detailMovie_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DetailMovie(childComplexity, args["input"].(model.PrimaryID)), true
-
 	case "Mutation.editReview":
 		if e.complexity.Mutation.EditReview == nil {
 			break
@@ -280,6 +268,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Register(childComplexity, args["input"].(model.Register)), true
+
+	case "Query.detailMovie":
+		if e.complexity.Query.DetailMovie == nil {
+			break
+		}
+
+		args, err := ec.field_Query_detailMovie_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DetailMovie(childComplexity, args["input"].(model.PrimaryID)), true
 
 	case "Query.movies":
 		if e.complexity.Query.Movies == nil {
@@ -592,10 +592,10 @@ input PrimaryID {
 
 type Query {
   movies: [Movie!]!
+  detailMovie(input: PrimaryID!): MovieDetail!
 }
 
 type Mutation {
-  detailMovie(input: PrimaryID!): MovieDetail!
   register(input: Register!): String!
   login(input: Login!): String!
   newReview(input: NewReview!): String!
@@ -617,21 +617,6 @@ func (ec *executionContext) field_Mutation_deleteReview_args(ctx context.Context
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNDeleteReview2movie_graphql_beᚋgraphᚋmodelᚐDeleteReview(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_detailMovie_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.PrimaryID
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNPrimaryID2movie_graphql_beᚋgraphᚋmodelᚐPrimaryID(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -712,6 +697,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_detailMovie_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PrimaryID
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNPrimaryID2movie_graphql_beᚋgraphᚋmodelᚐPrimaryID(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -1138,48 +1138,6 @@ func (ec *executionContext) _MovieDetail_reviews(ctx context.Context, field grap
 	return ec.marshalNReview2ᚕᚖmovie_graphql_beᚋgraphᚋmodelᚐReviewᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_detailMovie(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_detailMovie_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DetailMovie(rctx, args["input"].(model.PrimaryID))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.MovieDetail)
-	fc.Result = res
-	return ec.marshalNMovieDetail2ᚖmovie_graphql_beᚋgraphᚋmodelᚐMovieDetail(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_register(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1423,6 +1381,48 @@ func (ec *executionContext) _Query_movies(ctx context.Context, field graphql.Col
 	res := resTmp.([]*model.Movie)
 	fc.Result = res
 	return ec.marshalNMovie2ᚕᚖmovie_graphql_beᚋgraphᚋmodelᚐMovieᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_detailMovie(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_detailMovie_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DetailMovie(rctx, args["input"].(model.PrimaryID))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.MovieDetail)
+	fc.Result = res
+	return ec.marshalNMovieDetail2ᚖmovie_graphql_beᚋgraphᚋmodelᚐMovieDetail(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3833,16 +3833,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "detailMovie":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_detailMovie(ctx, field)
-			}
-
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "register":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_register(ctx, field)
@@ -3933,6 +3923,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_movies(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "detailMovie":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_detailMovie(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
