@@ -15,52 +15,6 @@ import (
 	"movie_graphql_be/internal/users"
 )
 
-func (r *mutationResolver) DetailMovie(ctx context.Context, input model.PrimaryID) (*model.MovieDetail, error) {
-	var resultMovie *model.MovieDetail
-	var resultReviews []*model.Review
-	user := auth.ForContext(ctx)
-	if user == nil {
-		err := fmt.Errorf("not authorized")
-		log.Println(err)
-		return nil, err
-	}
-
-	dbMovie, err := movies.GetByID(input.ID)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	dbReviews, err := reviews.GetAllReviewsByID(input.ID)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	for _, dbReviews := range dbReviews {
-		resultReviews = append(resultReviews, &model.Review{
-			ID:        dbReviews.ID,
-			MovieID:   dbReviews.MovieID,
-			UserID:    dbReviews.UserID,
-			Username:  dbReviews.Username,
-			Review:    dbReviews.Review,
-			CreatedAt: dbReviews.CreatedAt,
-			UpdatedAt: dbReviews.UpdatedAt,
-		})
-	}
-
-	resultMovie = &model.MovieDetail{
-		ID:       dbMovie.ID,
-		Title:    dbMovie.Title,
-		Year:     dbMovie.Year,
-		Poster:   dbMovie.Poster,
-		Overview: dbMovie.Overview,
-		Reviews:  resultReviews,
-	}
-	
-	return resultMovie, nil
-}
-
 func (r *mutationResolver) Register(ctx context.Context, input model.Register) (string, error) {
 	var user users.User
 	var login users.Login
@@ -200,6 +154,52 @@ func (r *queryResolver) Movies(ctx context.Context) ([]*model.Movie, error) {
 	return result, nil
 }
 
+func (r *queryResolver) DetailMovie(ctx context.Context, input model.PrimaryID) (*model.MovieDetail, error) {
+	var resultMovie *model.MovieDetail
+	var resultReviews []*model.Review
+	user := auth.ForContext(ctx)
+	if user == nil {
+		err := fmt.Errorf("not authorized")
+		log.Println(err)
+		return nil, err
+	}
+
+	dbMovie, err := movies.GetByID(input.ID)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	dbReviews, err := reviews.GetAllReviewsByID(input.ID)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	for _, dbReviews := range dbReviews {
+		resultReviews = append(resultReviews, &model.Review{
+			ID:        dbReviews.ID,
+			MovieID:   dbReviews.MovieID,
+			UserID:    dbReviews.UserID,
+			Username:  dbReviews.Username,
+			Review:    dbReviews.Review,
+			CreatedAt: dbReviews.CreatedAt,
+			UpdatedAt: dbReviews.UpdatedAt,
+		})
+	}
+
+	resultMovie = &model.MovieDetail{
+		ID:       dbMovie.ID,
+		Title:    dbMovie.Title,
+		Year:     dbMovie.Year,
+		Poster:   dbMovie.Poster,
+		Overview: dbMovie.Overview,
+		Reviews:  resultReviews,
+	}
+
+	return resultMovie, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
@@ -208,3 +208,55 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *mutationResolver) DetailMovie(ctx context.Context, input model.PrimaryID) (*model.MovieDetail, error) {
+	var resultMovie *model.MovieDetail
+	var resultReviews []*model.Review
+	user := auth.ForContext(ctx)
+	if user == nil {
+		err := fmt.Errorf("not authorized")
+		log.Println(err)
+		return nil, err
+	}
+
+	dbMovie, err := movies.GetByID(input.ID)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	dbReviews, err := reviews.GetAllReviewsByID(input.ID)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	for _, dbReviews := range dbReviews {
+		resultReviews = append(resultReviews, &model.Review{
+			ID:        dbReviews.ID,
+			MovieID:   dbReviews.MovieID,
+			UserID:    dbReviews.UserID,
+			Username:  dbReviews.Username,
+			Review:    dbReviews.Review,
+			CreatedAt: dbReviews.CreatedAt,
+			UpdatedAt: dbReviews.UpdatedAt,
+		})
+	}
+
+	resultMovie = &model.MovieDetail{
+		ID:       dbMovie.ID,
+		Title:    dbMovie.Title,
+		Year:     dbMovie.Year,
+		Poster:   dbMovie.Poster,
+		Overview: dbMovie.Overview,
+		Reviews:  resultReviews,
+	}
+
+	return resultMovie, nil
+}
